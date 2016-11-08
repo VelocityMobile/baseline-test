@@ -66,7 +66,6 @@ USER root
 VOLUME /root/.npm
 
 RUN mkdir -p /usr/src/app/
-ADD ./.npmrc /usr/src/app/
 WORKDIR /usr/src/app
 
 # Install nvm with node and npm, then migrate the local database
