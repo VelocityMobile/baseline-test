@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 
 MAINTAINER backend@velocityapp.com
 
-ENV DATABASE_URL         postgres://root@localhost/reservations-db
+ENV DATABASE_URL         postgres://postgres@localhost/reservations-db
 ENV DEPLOY_MODE          test
 ENV NODE_ENV             test
 ENV NVM_DIR              /usr/local/nvm
@@ -53,8 +53,7 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER postgres
 
 RUN service postgresql start &&\
-    psql --command "CREATE USER root WITH SUPERUSER PASSWORD 'docker';" &&\
-    createdb -O root reservations-db &&\
+    createdb -O postgres reservations-db &&\
     psql $DATABASE_URL -c 'CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology; CREATE EXTENSION fuzzystrmatch; CREATE EXTENSION postgis_tiger_geocoder;' 1>/dev/null &&\
     service postgresql stop
 
