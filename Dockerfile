@@ -18,11 +18,11 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN dpkg-divert --local --rename --add /sbin/initctl
 
 RUN apt-get -y update
-RUN apt-get -y install wget ca-certificates rpl pwgen git curl
+RUN apt-get -y install ca-certificates rpl pwgen git curl
 
 # Install postgres / postgis
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get -y install postgresql-9.5-postgis-2.2 postgis
