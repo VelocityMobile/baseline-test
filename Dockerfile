@@ -18,16 +18,14 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN dpkg-divert --local --rename --add /sbin/initctl
 
 RUN apt-get -y update
-RUN apt-get -y install ca-certificates rpl pwgen git curl
+RUN apt-get -y install wget ca-certificates rpl pwgen git curl
 
-#-------------Application Specific Stuff ----------------------------------------------------
-# We add postgis as well to prevent build errors (that we dont see on local builds)
-# on docker hub e.g.
-# The following packages have unmet dependencies:
-# postgresql-9.3-postgis-2.1 : Depends: libgdal1h (>= 1.9.0) but it is not going to be installed
-#                              Recommends: postgis but it is not going to be installed
-RUN apt-get install -y postgresql-9.3-postgis-2.1 postgis
-RUN apt-get install -y wget redis-server
+# Install postgres / postgis
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get -y install postgresql-9.5-postgis-2.2 postgis
 
 # Set debconf to run non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
@@ -48,9 +46,9 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "postgres:docker" | chpasswd && adduser postgres sudo
-RUN echo "local   all             all                                     ident" > /etc/postgresql/9.3/main/pg_hba.conf
-RUN echo "host    all             all             127.0.0.1/32            trust" >> /etc/postgresql/9.3/main/pg_hba.conf
-RUN echo "host    all             all             ::1/128                 trust" >> /etc/postgresql/9.3/main/pg_hba.conf
+RUN echo "local   all             all                                     trust" > /etc/postgresql/9.5/main/pg_hba.conf
+RUN echo "host    all             all             127.0.0.1/32            trust" >> /etc/postgresql/9.5/main/pg_hba.conf
+RUN echo "host    all             all             ::1/128                 trust" >> /etc/postgresql/9.5/main/pg_hba.conf
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER postgres
 
