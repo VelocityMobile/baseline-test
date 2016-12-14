@@ -26,7 +26,7 @@ RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get -y install postgresql-9.5-postgis-2.2
-RUN apt-get -y --without-recommends postgis
+RUN apt-get -y install postgis --without-recommends 
 
 # Set debconf to run non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
