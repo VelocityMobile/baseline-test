@@ -5,4 +5,4 @@ machine:
 test:
   override: 
     - docker build -t baseline-test-postgres -f postgres/Dockerfile .
-    - docker build -t baseline-test-postgres -f mysql/Dockerfile .
+    - docker build -t baseline-test-mysql -f mysql/Dockerfile .
