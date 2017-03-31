@@ -1,8 +1,8 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 MAINTAINER backend@velocityapp.com
 
-ENV DATABASE_URL         postgres://postgres@localhost/reservations-db
+ENV DEBIAN_FRONTEND      noninteractive
 ENV DEPLOY_MODE          test
 ENV NODE_ENV             test
 ENV NVM_DIR              /usr/local/nvm
@@ -18,15 +18,14 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN dpkg-divert --local --rename --add /sbin/initctl
 
 RUN apt-get -y update
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get -y install ca-certificates rpl pwgen git curl
 
-# Install postgres / postgis
-RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+# Install mysql
+RUN apt-get -y install software-properties-common python-software-properties
 RUN apt-get -y update
 RUN apt-get -y upgrade
-RUN apt-get -y install postgresql-9.5-postgis-2.2
-RUN apt-get install -y --no-install-recommends postgis
+RUN apt-get -y install mariadb-server mariadb-client
 
 # Set debconf to run non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
@@ -41,24 +40,17 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
         libssl-dev \
         python \
         rsync \
-        software-properties-common \
         wget \
-        libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN echo "postgres:docker" | chpasswd && adduser postgres sudo
-RUN echo "local   all             all                                     trust" > /etc/postgresql/9.5/main/pg_hba.conf
-RUN echo "host    all             all             127.0.0.1/32            trust" >> /etc/postgresql/9.5/main/pg_hba.conf
-RUN echo "host    all             all             ::1/128                 trust" >> /etc/postgresql/9.5/main/pg_hba.conf
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER postgres
+RUN cp /etc/mysql/my.cnf /usr/share/mysql/my-default.cnf
+RUN mysql_install_db
 
-RUN service postgresql start &&\
-    createdb -O postgres reservations-db &&\
-    psql $DATABASE_URL -c 'CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology; CREATE EXTENSION fuzzystrmatch; CREATE EXTENSION postgis_tiger_geocoder;' 1>/dev/null &&\
-    service postgresql stop
+ENV DATABASE_URL    mysql://root@localhost/test-database
 
-USER root
+RUN service mysql start && \
+    mysql -h localhost --user=root -e 'CREATE DATABASE test_database;' && \
+    service mysql stop
 
 # Exclude the NPM cache from the image
 VOLUME /root/.npm
@@ -73,8 +65,9 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | b
     && nvm alias default $NODE_VERSION \
     && nvm use default
 
-ENV NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
-ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+ENV NODE_PATH            $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
+ENV PATH                 $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+ENV DEBIAN_FRONTEND      ""
 
 # Open port 5432 for postgres, 8000 for the app
 EXPOSE 5432
