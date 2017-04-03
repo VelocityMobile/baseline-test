@@ -46,9 +46,10 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
 RUN cp /etc/mysql/my.cnf /usr/share/mysql/my-default.cnf
 RUN mysql_install_db
 
-ENV DATABASE_URL    mysql://root@localhost/test-database
+ENV DATABASE_URL    mysql://root@localhost/test_database
 
 RUN service mysql start && \
+    mysql -h localhost --user=root -e "use mysql; update user set authentication_string=password(''), plugin='mysql_native_password' where user='root'; flush privileges;" && \
     mysql -h localhost --user=root -e 'CREATE DATABASE test_database;' && \
     service mysql stop
 
