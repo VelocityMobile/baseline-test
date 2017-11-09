@@ -6,7 +6,7 @@ ENV DATABASE_URL         postgres://postgres@localhost/reservations-db
 ENV DEPLOY_MODE          test
 ENV NODE_ENV             test
 ENV NVM_DIR              /usr/local/nvm
-ENV NODE_VERSION         6.9.1
+ENV NODE_VERSION         8.9.1
 ENV PORT                 8000
 
 RUN usermod -u 1000 www-data
