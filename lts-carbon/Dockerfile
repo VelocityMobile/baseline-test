@@ -11,7 +11,7 @@ ENV PORT                 8000
 
 RUN usermod -u 1000 www-data
 RUN usermod -G staff www-data
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+RUN ln -sf /bin/bash /bin/sh
 
 RUN export DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND noninteractive
