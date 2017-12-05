@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND      noninteractive
 ENV DEPLOY_MODE          test
 ENV NODE_ENV             test
 ENV NVM_DIR              /usr/local/nvm
-ENV NODE_VERSION         lts/carbon
+ENV NVM_VERSION          0.33.6
+ENV NODE_VERSION         8.9.1
 ENV PORT                 8000
 
 RUN usermod -u 1000 www-data
@@ -47,7 +48,7 @@ RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app
 
 # Install nvm with node and npm, then migrate the local database
-RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash \
+RUN curl https://raw.githubusercontent.com/creationix/nvm/v$NVM_VERSION/install.sh | bash \
     && source $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
